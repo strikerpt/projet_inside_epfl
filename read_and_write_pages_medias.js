@@ -4,7 +4,6 @@ const request = require("request").defaults({ encoding: null });
 
 //Read url and write the content of pages in elasticsearch
 const getPages = async () => {
-  console.log("getPages");
   return axios
     .get(
       "https://inside.epfl.ch/help-wordpress/wp-json/wp/v2/pages?per_page=100"
@@ -17,7 +16,6 @@ const getPages = async () => {
 
 //Read url and write the content of medias in elasticsearch
 const getMedias = async () => {
-  console.log("getMedias");
   return axios
     .get(
       "https://inside.epfl.ch/help-wordpress/wp-json/wp/v2/media?per_page=100"
@@ -34,29 +32,20 @@ const convert_files_to_base64 = async (file_name, source_media) => {
 
   //Convert file from url to base64
   request.get(`${source_media}`, async function (error, response, body) {
-    console.log(source_media);
     data = Buffer.from(body).toString("base64");
-    await write_data_medias(file_name, data, source_media);
-  });
-};
-
-//Write data into elasticsearch
-const write_data_medias = async (file_name, data, source_media) => {
-  console.log("write_data_medias");
-  //Write the data into elasticsearch
-  return axios({
-    method: "POST",
-    url: `https://searchinside-elastic.epfl.ch/inside_temp/_doc?pipeline=attachment`,
-    data: {
-      url: `${source_media}`,
-      rights: `test`,
-      data: `${data}`,
-    },
+    return axios({
+      method: "POST",
+      url: `https://searchinside-elastic.epfl.ch/inside_temp/_doc?pipeline=attachment`,
+      data: {
+        url: `${source_media}`,
+        rights: `test`,
+        data: `${data}`,
+      },
+    });//await write_data_medias(file_name, data, source_media);
   });
 };
 
 const write_data_pages = async (link_page, title_page, StripHTMLBreakLines) => {
-  console.log("write_data_pages");
   //Write the data into elasticsearch
   return axios({
     method: "POST",
@@ -72,7 +61,6 @@ const write_data_pages = async (link_page, title_page, StripHTMLBreakLines) => {
 
 //Delete inside temp
 const delete_inside_temp = async () => {
-  console.log("delete_inside_temp");
   return axios({
     method: "DELETE",
     url: `https://searchinside-elastic.epfl.ch/inside_temp`,
@@ -81,7 +69,6 @@ const delete_inside_temp = async () => {
 
 //Delete inside temp
 const delete_inside = async () => {
-  console.log("delete_inside");
   return axios({
     method: "DELETE",
     url: `https://searchinside-elastic.epfl.ch/inside`,
@@ -90,7 +77,6 @@ const delete_inside = async () => {
 
 //Create inside temp
 const create_inside_temp = async () => {
-  console.log("create_inside_temp");
   return axios({
     method: "POST",
     url: `https://searchinside-elastic.epfl.ch/inside_temp/_doc/`,
@@ -124,7 +110,6 @@ const create_inside_temp = async () => {
 
 //Create attachment field
 const create_attachment_field = async () => {
-  console.log("create_attachement_field");
   return axios({
     method: "PUT",
     url: `https://searchinside-elastic.epfl.ch/_ingest/pipeline/attachment`,
@@ -143,7 +128,6 @@ const create_attachment_field = async () => {
 
 //Copy inside temp into inside
 const copy_inside_temp_to_inside = async () => {
-  console.log("copy_inside_temp_to_inside");
 
   //Put the inside_temp into inside
   return axios({
@@ -162,7 +146,6 @@ const copy_inside_temp_to_inside = async () => {
 
 //Get data from pages and medias
 const get_data_from_pages = async () => {
-  console.log("get_data_from_pages");
   let pages = await getPages();
 
   // loop over each entries to display title
@@ -180,7 +163,6 @@ const get_data_from_pages = async () => {
 
 //Get data from pages and medias
 const get_data_from_medias = async () => {
-  console.log("get_data_from_medias");
   // loop over each entries to display title
   let medias = await getMedias();
 
@@ -198,8 +180,9 @@ const get_data_from_medias = async () => {
   }
 };
 
+
+//Function to launch script
 const launch_script = async () => {
-  console.log("launch_script");
   await delete_inside_temp();
   await create_inside_temp();
   await create_attachment_field();
